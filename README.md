@@ -6,9 +6,9 @@ This repository provides Python scripts to download and preprocess six standard 
 
 | Database | Script | Records | Native Fs (Hz) | Output Directory |
 |-----------|----------|:-------:|:--------------:|------------------|
-| MIT-BIH Arrhythmia | `downloadMITBIH.py` | 48 | 360 | `mitdb-mat/` |
-| QT Database | `downloadQT.py` | 105 | 250 | `qtdb-mat/` |
-| Noise Stress Test | `downloadNSTDB.py` | 12 | 360 | `nstdb-mat/` |
+| MIT-BIH Arrhythmia (MITDB) | `downloadMITBIH.py` | 48 | 360 | `mitdb-mat/` |
+| QT Database (QTDB) | `downloadQT.py` | 105 | 250 | `qtdb-mat/` |
+| Noise Stress Test (NSTDB) | `downloadNSTDB.py` | 12 | 360 | `nstdb-mat/` |
 | European ST-T (EDB) | `downloadSTT.py` | 90 | 250 | `edb-mat/` |
 | Normal Sinus Rhythm (NSRDB) | `downloadNSRDB.py` | 18 | 128 | `nsrdb-mat/` |
 | T-Wave Alternans (TWADB) | `downloadTWADB.py` | 100 | 500 | `twadb-mat/` |
@@ -87,7 +87,5 @@ Output directories match the MATLAB `dataDir` variable.
 
 For NSRDB, the script exports data at 128 Hz; MATLAB resamples to 130 Hz and converts annotation indices accordingly.
 
-## License
-
-- Code: MIT License
+## Usage
 - Data: Subject to PhysioNet terms of use
