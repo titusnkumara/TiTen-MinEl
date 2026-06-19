@@ -87,5 +87,74 @@ Output directories match the MATLAB `dataDir` variable.
 
 For NSRDB, the script exports data at 128 Hz; MATLAB resamples to 130 Hz and converts annotation indices accordingly.
 
+## MATLAB Usage Guide for QRS Detection Pipeline
+
+This repository includes MATLAB scripts for training (optimising) the two adapted detectors (MinEl and TiTen) and for evaluating them on any of the six databases.
+
+### Prerequisites
+- MATLAB R2020a or newer.
+- Signal Processing Toolbox (for `filtfilt`, `butter`).
+- Parallel Computing Toolbox (optional, but recommended for speed; scripts use `parfor`).
+- The Python scripts must have been run first to generate the `.txt` files in the expected directories (see the table above).
+
+### Training / Optimisation
+Two separate optimisation scripts are provided – one for each detector. They use mixed‑integer surrogate optimisation (`surrogateopt`) on a combined training corpus (MITDB + QTDB + NSTDB) to find the best parameters.
+
+#### A) Optimise Elgendi (MinEl)
+- **File**: `MinEl.m`
+- **What it does**:
+  - Loads the training databases (`'qtdb'`, `'mitdb'`, `'nstdb'`).
+  - Applies bandpass filter (8–25 Hz) and min‑max extrema extraction to 10 Hz.
+  - Uses `surrogateopt` to maximise F1 over 11 parameters.
+- **How to run**:
+  1. Open `OptimizeElgendiAllrecords.mlx` in MATLAB.
+  2. Ensure the `.txt` files for MITDB, QTDB, and NSTDB are present in `mitdb-mat/`, `qtdb-mat/`, `nstdb-mat/`.
+  3. Run the script. It will take several minutes (500 function evaluations).
+  4. The best parameters will be printed in the command window at the end.
+
+#### B) Optimise Pan‑Tompkins (TiTen)
+- **File**: `OptimizePanTompkinsAllRecords.mlx`
+- **What it does**: same workflow but for the TiTen detector (bandpass 8–36 Hz, adapted Pan‑Tompkins).
+- **How to run**: same as above.
+
+> **Note**: If you only want to use the optimised parameters reported in the paper, you can skip training and directly use the evaluation script with the default parameters (which are already set to the optimised values).
+
+### Evaluation
+The main evaluation script is where you set the database and algorithm at the top. It computes both native‑rate and 10‑Hz pipeline performance and compares them.
+
+#### File: `EvaluateAllChunks.mlx`
+
+#### Setup
+At the top of the script, modify these two variables:
+- `database` – choose one of: `'mitdb'`, `'qtdb'`, `'nstdb'`, `'edb'`, `'twadb'`, `'nsrdb'`.
+- `algorithm` – choose either `'elgendi'` or `'pan-tompkins'`.
+
+The script automatically selects the correct `dataDir`, `Fs_orig`, record list, and divisor based on the database.
+
+#### What the evaluation does
+1. **Native baseline**: Runs the chosen algorithm on the raw (native‑rate) ECG signal and evaluates using the same annotation files.
+2. **Pipeline**: Chunks the signal into 40‑minute pseudo‑records, applies bandpass filter, extracts min/max extrema (10 Hz), runs the adapted detector (MinEl or TiTen), maps detections back to original samples, and evaluates.
+3. **Comparison**: Provides global F1, sensitivity, precision, timing jitter, throughput, per‑record F1, and a statistical comparison (Wilcoxon signed‑rank test with 95% CI for ΔF1).
+
+#### Parameters you can adjust
+- `tol_ms = 150` – matching tolerance (milliseconds).
+- `chunk_duration_sec = 40 * 60` – pseudo‑record length (change if needed).
+- `AMP_THRESH = 0.05` – minimum amplitude (mV) for a detection to be kept.
+
+### Adding a New Database
+If you want to add a new database:
+- Add a new `elseif` block in the database parameter section (defining `dataDir`, `Fs_orig_native`, record list, `resample_required`, and the divisor).
+- The divisor must be chosen so that `Fs_orig / divisor` equals 10 (or your target Fs).
+- Ensure your Python export script outputs the same format (`.txt` and `-ann.txt`).
+
+### Typical Workflow
+1. Run the Python scripts to download and export the databases.
+2. (Optional) Run the optimisation scripts to obtain parameters for your own training set, or use the pre‑optimised values in the evaluation script.
+3. Run the evaluation script for each database and algorithm combination to reproduce the results in the paper.
+
+### Notes
+- The optimisation scripts use the same preprocessing (bandpass + min‑max) as the evaluation pipeline, so the results are directly comparable.
+- For large databases (EDB, NSRDB), evaluation may take several minutes. NSRDB may take more than 1 hour with Pan-Tompkins; optimisation will take longer.
+
 ## Usage
 - Data: Subject to PhysioNet terms of use
