@@ -101,7 +101,7 @@ This repository includes MATLAB scripts for training (optimising) the two adapte
 Two separate optimisation scripts are provided – one for each detector. They use mixed‑integer surrogate optimisation (`surrogateopt`) on a combined training corpus (MITDB + QTDB + NSTDB) to find the best parameters.
 
 #### A) Optimise Elgendi (MinEl)
-- **File**: `MinEl.m`
+- **File**: `OptimizeElgendiAllrecords.mlx`
 - **What it does**:
   - Loads the training databases (`'qtdb'`, `'mitdb'`, `'nstdb'`).
   - Applies bandpass filter (8–25 Hz) and min‑max extrema extraction to 10 Hz.
